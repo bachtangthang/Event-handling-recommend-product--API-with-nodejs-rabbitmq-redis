@@ -1,0 +1,111 @@
+Product project (nodejs + postgresql) TO DO:
+1. Chỉnh cột Id vê kiểu interger auto increment (done)
+2. Tách folder chuẩn để dễ scale va doi ten file(done)
+3. Update api theo db moi (done)
+3. Chình sửa lại tên route có s hay ko có s theo chuẩm (ví dụ product vs products) (done)
+4. Tổ chức lại api theo chuẩn restful(done)
+5. Viết lại paging dùng ở dbms(done)
+6. viết dynamic queries cho get product với filters.(done)
+7. VIết lại api GET cho việc lấy dữ liệu theo cột(done)
+
+note:
+
+offset = (page -1)* limit
+
+restful
+    method: POST | PUT | DELETE | UPDATE
+    path: /products
+
+    POST /products
+    PUT /products/:productId
+    DELETE /products/:productId
+   
+    GET /products/:productId?columns=product_name,price,qty
+
+    GET /products?filters=[[], []]&limit=10&page=1&sort_by=product_name&sort=desc&columns=product_name,price,qty
+    
+    JSON.stringify encodeURIComponent -> JSON.parse
+
+    req.query.filters -> str -> JSON.parse
+        filters = [[]]
+    
+    : filters + sort + limit + offset
+
+(qty > 0 AND unit = 'Nồi') OR product_name like '%Lẩu%'
+(condition 1 and condition 2) OR (condition 3 AND condition 4) OR condition 5
+filters = [
+    [
+        {
+            column: 'qty'
+            operator: "greater_than"
+            value: 0
+        },
+        {
+            column: 'unit'
+            operator: "equals"
+            value: 'Nồi'
+        }
+    ],
+    [
+        {
+            column: 'instock'
+            operator: "lte"
+            value: 100
+        },
+        {
+            column: 'price'
+            operator: "lte"
+            value: 6000
+        }
+    ]
+]
+
+greater_than: >
+=
+contains: like
+less: <
+
+cach chia route
+modules/version/resource
+ex: admin/v1.0/posts
+ shipper/v2.1/orders
+
+ resources thuong o so nhieu (products, orders, posts)
+
+To do:
+1. fix file queries Parser, chu y dat ten, sua chuoi(done)
+ - tranh dat ten chung chung nhu a,b,c, temp
+ - array phai co s, vd products
+ - object ko nen co s, vd product, de khi product.id la biet ngay object
+ - can prefix nhu newProduct, removedProduct, 
+ - class nen viet hoa ca chu cai dau tien, instance cua class thi ko
+ VD: productModel = new ProductModel 
+ - nen noi string voi `` han che dung +
+2. Tach productModel, sua cac api tro thanh dynamic(done)
+3. Tao class va ke thua theo oop(done)
+
+To do:
+1. Tim hieu rabbitMQ va redis(done)
+2. Cai dat rabbitMQ va redis va project hien tai
+ - writeToCache(done)
+ - getFromCache
+ - sendToQueue
+ - 
+3. Tim hieu cau truc cua redis
+
+--see all port in use: sudo lsof -i -P -n | grep LISTEN
+
+*cau hoi
+1. Luu du lieu o redis duoi dang gi(string?, object?(done)
+2. Du lieu duoc gui trong queue trong rabbit co dang gi(done)
+
+to do:
+1. Tao file .env(done)
+2. Tao file index.js cho model(done)
+3. model chi tra ve array du lieu => controller se chi nhan array du lieu, khien cho code de doc hon(done)
+4. luu tru xuong redis bang hash object(done)
+5. lay du lieu len bang hash object(done)
+6. cai dat local rabbitMQ(done)
+7. Try catch o cac cau lenh can thiet(done)
+8. chi truyen vao queue product_id, sau do o product_worker se tien hanh call api lai lan nua(done)
+9. Doi phuong thuc tren redis thanh hmget va hmsetall?
