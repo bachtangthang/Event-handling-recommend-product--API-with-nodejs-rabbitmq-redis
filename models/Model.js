@@ -32,6 +32,7 @@ class CRUDModel {
   async update(id, payload) {
     let args = [];
     let parameter = [];
+    console.log(id);
     //Object.keys(payload).key => columns.push(key); args.push(payload[key])
     Object.keys(payload).forEach((key, index) => {
       args.push(payload[key]);
@@ -44,6 +45,7 @@ class CRUDModel {
 
     let query = `Update ${this.table} Set ${parameter} Where ${this.tablePrimaryKey} = $${idStr} returning *`;
     console.log(query);
+    console.log([...args, id]);
     return (await client.query(query, [...args, id])).rows;
   }
 

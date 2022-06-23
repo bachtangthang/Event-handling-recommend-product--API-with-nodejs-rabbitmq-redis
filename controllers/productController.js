@@ -1,19 +1,16 @@
-//const productModel = require("../models/productModel");
-const { ProductModel } = require("../models/ProductModel");
 const { productModel } = require("../models/index");
 const amqp = require("amqplib/callback_api");
 
 const RABBIT_URL = process.env.RABBIT_URL;
 
 const RABBIT_QUEUE_NAME = "product";
-const table = "product";
-const tablePrimaryKey = "product_id";
-const DEFAULT_COLUMNS = "product_id,product_name,qty";
-const DEFAULT_SORT = "product_id";
+const DEFAULT_COLUMNS = "id,product_name";
 
 var channel, connection;
 const Redis = require("ioredis");
 const redis = new Redis(6379);
+const { xoa_dau } = require("../helpers/xoadau");
+const { readHtml } = require("../helpers/doT");
 
 amqp.connect(RABBIT_URL, function (error0, connection) {
   if (error0) {
@@ -27,11 +24,6 @@ amqp.connect(RABBIT_URL, function (error0, connection) {
     ch.assertQueue(RABBIT_QUEUE_NAME, {
       durable: false,
     });
-
-    // setTimeout(function () {
-    //   connection.close();
-    //   process.exit(0);
-    // }, 500);
   });
 });
 
@@ -63,6 +55,7 @@ module.exports = {
       const { id } = req.params;
       const { columns } = req.query;
       const allProducts = await productModel.getDetail(id, columns);
+      res.cookie(`_uid`, `123-456-789`);
       return res.status(200).json(allProducts.rows);
     } catch (err) {
       console.log(err.message);
@@ -129,8 +122,6 @@ module.exports = {
         for (col of columns.split(",")) {
           product[col] = await redis.hget(`products:${id}`, col);
         }
-
-        //product = await redis.hmget(`products:${id}`, ...columns.split(","));
         console.log(product);
 
         return res.status(200).json(product);
@@ -143,6 +134,154 @@ module.exports = {
     } catch (err) {
       console.log(err.message);
       res.status(500);
+    }
+  },
+
+  async upsertMany(req, res) {
+    try {
+      const upsertedProducts = await productModel.upsertMany(req.body);
+      console.log(upsertedProducts);
+      return res.status(200).json(upsertedProducts);
+    } catch (err) {
+      console.log(err);
+      return res.status(500);
+    }
+  },
+
+  async getTopMostViewProductByCategory(req, res) {
+    try {
+      let category = xoa_dau(req.body.category);
+      let { portal_id } = req.body;
+      let records = req.body.records;
+      console.log("portal_id: ", portal_id);
+      let key = `portal:${portal_id}:category:${category}:mostview`;
+      let productsId = await redis.zrevrange(key, 0, records - 1);
+      console.log(productsId);
+      return res.status(200).json(productsId);
+    } catch (err) {
+      console.log(err);
+      return res.status(500);
+    }
+  },
+  async mostViewProductByUser(req, res) {
+    try {
+      const uid = req.body.__uid;
+      let { portal_id, records } = req.body;
+      let key = `portal:${portal_id}:user:${uid}:mostview`;
+      const productsId = await redis.zrevrange(key, 0, records - 1);
+      return res.status(200).json({ productsId });
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  async mostViewProductByCategory(req, res) {
+    try {
+      let category = xoa_dau(req.body.category);
+      let { records, portal_id } = req.body;
+      let key = `portal:${portal_id}:category:${category}:mostview`;
+      let productsId = await redis.zrevrange(key, 0, records - 1);
+      return res.status(200).json({ productsId });
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  async getHtmlTopViewProductByCategory(req, res) {
+    try {
+      let products = [];
+      let category = xoa_dau(req.body.category);
+      console.log(category);
+      let { records, portal_id } = req.body;
+      console.log("portal_id: ", portal_id);
+      let key = `portal:${portal_id}:category:${category}:mostview`;
+      console.log("key: ", key);
+      let productIds = await redis.zrevrange(key, 0, records - 1);
+      console.log("productIds:", productIds);
+
+      for (let productId of productIds) {
+        console.log("productId: ", productId);
+        let product = await redis.hgetall(
+          `portal:${portal_id}:products:${productId}`
+        );
+        let view = await redis.zscore(key, productId);
+        product.view = view;
+        products.push(product);
+      }
+      console.log("mang products:", products);
+      let title = "Product of the same category";
+
+      let html;
+      switch (portal_id) {
+        case 1:
+          html = await readHtml(
+            "./view/NguyenKim_productRecommend.html",
+            products,
+            title
+          );
+          break;
+        case 2:
+          html = await readHtml(
+            "./view/PNJ_productRecommend.html",
+            products,
+            title
+          );
+        default:
+          break;
+      }
+      res.writeHead(200, { "Content-Type": "text/html" });
+      //console.log("html: ", html);
+      res.end(html);
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  async getHtmlViewedProduct(req, res) {
+    try {
+      let products = [];
+      let { __uid, records, portal_id } = req.body;
+      console.log(`__uid: ${__uid}, records: ${records}`);
+      let key = `portal:${portal_id}:user:${__uid}`;
+      console.log("key: ", key);
+      let productIds = await redis.smembers(key);
+      console.log("productIds:", productIds);
+
+      for (let productId of productIds) {
+        console.log("productId: ", productId);
+        let product = await redis.hgetall(
+          `portal:${portal_id}:products:${productId}`
+        );
+        let view = await redis.zscore(
+          `portal:${portal_id}:user:${__uid}:mostview`,
+          productId
+        );
+        product.view = view;
+        products.unshift(product);
+      }
+      const sliceProducts = products.slice(0, records);
+      console.log("viewed products:", products);
+      let title = "recently viewed Products";
+      let html;
+      switch (portal_id) {
+        case 1:
+          html = await readHtml(
+            "./view/NguyenKim_productRecommend.html",
+            sliceProducts,
+            title
+          );
+          break;
+        case 2:
+          html = await readHtml(
+            "./view/PNJ_productRecommend.html",
+            sliceProducts,
+            title
+          );
+        default:
+          break;
+      }
+      res.writeHead(200, { "Content-Type": "text/html" });
+      //console.log("html: ", html);
+      res.end(html);
+    } catch (err) {
+      console.log(err);
     }
   },
 };

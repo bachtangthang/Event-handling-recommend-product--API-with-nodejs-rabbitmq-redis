@@ -62,3 +62,59 @@ select * from product where product_id = 2
 
 
 select * from public.product
+---------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+
+CREATE TABLE PRODUCTS(
+    id serial,
+    product_name text,
+    image_url text,
+    landing_page_url text,
+    category text,
+    price numeric(10,2),
+    status integer,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    product_id text,
+    portal_id integer,
+    PRIMARY KEY (id)
+);
+CREATE TABLE Users(
+    id serial,
+    uid text,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    portal_id integer,
+    PRIMARY KEY (id)
+);
+CREATE TABLE Event_histories(
+    event text,
+    uid text,
+    portal_id integer,
+    productsId text[]
+)
+
+drop table products;
+drop table users;
+drop table event_histories;
+
+delete from products;
+delete from users;
+delete from event_histories;
+
+insert into Products (product_name, image_url, landing_page_url, category, price, status, created_at, updated_at, product_id, portal_id) 
+values ('banh mi', 'img_url', 'url', 'category',1000000, 1, current_timestamp, current_timestamp, 321, 000)
+
+
+
+select * from products;
+select * from users;
+select * from event_histories;
+insert into event_histories (event, uid, productsId) values ('view_product', '123', '{002}') 
+insert into event_histories (event, uid) values ('view_product', '123')
+
+insert into users (uid) values ('1')
+
+select exists(select 1 from products where product_id='30555')
+select * from products where product_id = '123-456-789123151231'

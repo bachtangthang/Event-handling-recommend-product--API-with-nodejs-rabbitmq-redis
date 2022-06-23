@@ -3,7 +3,7 @@ const { queriesParser } = require("../helpers/queriesParser");
 
 const table = "product";
 const tablePrimaryKey = "product_id";
-const DEFAULT_COLUMNS = ["product_id", "product_name", "qty"];
+const DEFAULT_COLUMNS = ["product_id", "product_name"];
 const DEFAULT_SORT = "product_id";
 
 module.exports = {

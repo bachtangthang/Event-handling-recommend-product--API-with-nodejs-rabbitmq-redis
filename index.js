@@ -1,9 +1,12 @@
 const express = require("express");
 const app = express();
-const router = require("./route/productRoute");
-const client = require("./db");
+const router = require("./route/index");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
+const cors = require("cors");
 
+app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 
 app.listen(5000, () => {

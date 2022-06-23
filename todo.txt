@@ -108,4 +108,137 @@ to do:
 6. cai dat local rabbitMQ(done)
 7. Try catch o cac cau lenh can thiet(done)
 8. chi truyen vao queue product_id, sau do o product_worker se tien hanh call api lai lan nua(done)
-9. Doi phuong thuc tren redis thanh hmget va hmsetall?
+9. Doi phuong thuc tren redis thanh hmget va hmsetall?(not done)
+
+to do:
+1. install customjs extension(done)
+2. create database with wanted columns(done)
+3. crawl data with customjs(done)
+
+users
+  uid: primary key: string
+  ctime
+  utime
+
+products
+  id
+  product_id: nguyenkim
+  ...
+  landing_page_url
+
+event_histories
+  event: page_view
+  uid: xxx
+  productIds: []
+  ctime:
+
+ghi nhan: event
+to chuc cache: 
+tra ve 
+
+redis
+products:{product_id_1}: { product_name: ... }
+{uid}: [product_id_1, product_id_2]
+--------------------------------------------------
+/identify? -> uid: 123-456 -> postgres -> browser -> cookies
+
+/events?
+  -> rabbit queue: worker: -> postgres + redis
+
+  event: view_product
+  uid: 
+  products: [ { xxxx } ]
+
+uuid.v4()
+
+uid = A
+  A: May lanh Toshiba
+
+  A: Tivi Casper
+
+uid = B
+  B: Tivi Casper
+  B: Tivi Android
+
+
+1. Tao userModel va productModel va event_histories model(done)
+2. Phan route, model, controller lai (done)
+3. Viet api identify trong usersController(done)
+4. Config rabbitmq, redis(done)
+5. tra ra top 5 san pham gan nhat co cung category
+6. Viet api event trong event_historiesController(done)
+
+1. Dau tien, nguoi dung load 1 trang san pham bat kiem
+2. gui cookies nguoi dung, check xem co ton tai uid chua, neu chua thi tao moi va luu xuong database, neu co roi thi thoi, tra ve uid moi cho nguoi dung
+3. customjs gui cookies vao api events, body co dang:
+{
+    uid: (lay tu cookie, vua duoc tao/tra ve o buoc 2)
+    event: (o day la view_product)
+    products: [(thong tin duoc crawl o customjs)
+        {
+            product_id
+            product_name
+            ....
+        }
+    ]
+}
+4. truyen qua rabbitmq json dang tren, sau do eventworker se nhan event, roi tu day tao vong for, luu tru du lieu xuong database (product), 
+tra ve id product (id) roi luu du lieu xuong bang event, sau do luu tren redis. 
+5. luu tren redis co dang 
+products:{product_id_1}: { product_name: ... }
+hgetall
+{uid}: [product_id_1, product_id_2]
+smembers
+
+custom js chuyen cookies vao api chu k phai api tu lay cookies, tra ve mot event chu k nen gan bua vao cookies
+truyen qua rabbit mq du lieu nhu sau (o dang json)
+{
+    uid:
+    event:
+    products: [
+        {
+            product_id
+            product_name
+            ....
+        }
+    ]
+}
+
+todo:
+1. function getCookie, createCookie
+2. 
+
+to do:
+1. Nhung san pham user nay da coi roi thi ko them vao db product nua (done)
+2. trong bang event_histories productsId la id cua product trong db cua NguyenKim chu khong phai id cua db minh(done)
+
+// upsertMany
+// products [{}, {}]
+
+//SP most view
+redis -> luu uid va idsp key 
+
+ 
+to do
+1. viet ham upsertMany cho products, mang truyen vao co dang [{product1}, {product2}] (done)
+2. Load san pham most view cua mot user tu redis,(done)
+ duoi redis luu dang key = uid:mostview 123 2 123 3 123 5 , value la so lan dc user do view product nay dung ham incrby de tang gia tri value(done)
+dung zrange, zincrby(done)
+3. Load cac san pham most view cua cung 1 category tu redis(done)
+ duoi redis luu dang key = category:mostview 123 2 123 4, value la so lan dc user do view product nay dung ham incrby de tang gia tri value(done)
+
+ to do:
+ 1. doT.js(done)
+ 2. Load html(done)
+ 3. tra ve 5 product(done)
+
+
+ To do:
+ 1. Gio code se ap dung cho 1 he thong khac la trang web PNJ(done)
+ 2. 2 trang PNJ va NguyenKim se phan biet voi nhau thong qua portalID(done)
+ 3. Sua lai cac code voi portalID se dc chuyen tu frontend(done)
+ 4. Moi thu phai co portalId de phan biet giua 2 trang(done)
+ 5. Lam sao de khi doi giua 2 portal, ta chi can thay doi function lay du lieu va html tra ve, nhung thu khac phai duoc giu nguyen het suc co the(done)
+ 6. Them so luot view ngay canh san pham (done)
+ 7. Thay doi cach luu xuong redis, luc nay luu them portalId de dinh danh portal(done)
+
