@@ -113,7 +113,7 @@ module.exports = {
       );
       console.log("html Same category: ", htmlSameCategory);
       console.log("html recently view: ", htmlRecentlyView);
-      //res.writeHead(200, { "Content-Type": "application/json" });
+
       return res.json({ htmlSameCategory, htmlRecentlyView });
     } catch (err) {
       console.log(err);
