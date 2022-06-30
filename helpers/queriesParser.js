@@ -1,5 +1,3 @@
-const { release } = require("os");
-
 const descending = "desc";
 const ascending = "asc";
 
