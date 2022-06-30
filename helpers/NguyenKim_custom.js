@@ -1,4 +1,3 @@
-//code inside customjs extension
 function crawlData(portal_id) {
   const product_name =
     document.getElementsByClassName("product_info_name")[0].innerText;
@@ -34,6 +33,7 @@ function crawlData(portal_id) {
     status: 1,
     portal_id,
   };
+  console.log(crawledProduct);
   return crawledProduct;
 }
 
@@ -82,6 +82,7 @@ async function identify(demo_uid, portal_id) {
     let payload = {
       __uid: getCookie("demo_uid"),
       event: "viewProduct",
+      limit: 4,
     };
     console.log("payload inside identify function: ", payload);
     return payload;
@@ -92,15 +93,14 @@ async function identify(demo_uid, portal_id) {
 
 async function events(payload) {
   try {
-    await fetch("http://localhost:5000/eventHistories/events", {
+    let response = await fetch("http://localhost:5000/eventHistories/events", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("data", data);
-      });
+    });
+    let data = await response.json();
+    console.log("data in event function: ", data);
+    return data;
   } catch (err) {
     console.log(err);
   }
@@ -150,11 +150,11 @@ function appendHtml(data) {
     .getElementsByClassName(
       "span16 nk-product-collection nk-product-special margbt10"
     )[0]
-    .appendChild(div);
+    .append(div);
   console.log("div1: ", div);
 }
 
-async function main_NguyenKim(portal_id) {
+async function main(portal_id) {
   let crawledProduct = crawlData(portal_id);
   console.log("crawledProduct: ", crawledProduct);
 
@@ -165,29 +165,24 @@ async function main_NguyenKim(portal_id) {
   payload.products = [crawledProduct];
   payload.portal_id = portal_id;
   console.log("payload: ", payload);
-  await events(payload);
+  let { htmlSameCategory, htmlRecentlyView } = await events(payload);
+  // let recommendProductOfSameCategory = {
+  //   category: crawledProduct.category,
+  //   records: 4,
+  //   portal_id
+  // }
+  // let htmlTopViewProduct = await getHtmlTopViewProductByCategory(recommendProductOfSameCategory);
 
-  let recommendProductOfSameCategory = {
-    category: crawledProduct.category,
-    records: 4,
-    portal_id,
-  };
-  let htmlTopViewProduct = await getHtmlTopViewProductByCategory(
-    recommendProductOfSameCategory
-  );
+  appendHtml(htmlSameCategory);
 
-  appendHtml(htmlTopViewProduct);
+  // let recommendRecentlyViewedProduct = {
+  //   __uid: getCookie("demo_uid"),
+  //   records: 4,
+  //   portal_id
+  // }
+  // let htmlViewedProduct = await getHtmlViewedProduct(recommendRecentlyViewedProduct);
 
-  let recommendRecentlyViewedProduct = {
-    __uid: getCookie("demo_uid"),
-    records: 4,
-    portal_id,
-  };
-  let htmlViewedProduct = await getHtmlViewedProduct(
-    recommendRecentlyViewedProduct
-  );
-
-  appendHtml(htmlViewedProduct);
+  appendHtml(htmlRecentlyView);
 }
 
-main_NguyenKim(1);
+main(1);
