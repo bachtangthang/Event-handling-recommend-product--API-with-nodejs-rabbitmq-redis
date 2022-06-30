@@ -9,6 +9,7 @@ const DEFAULT_COLUMNS = "id,product_name";
 var channel, connection;
 const Redis = require("ioredis");
 const redis = new Redis(6379);
+const pipeline = redis.pipeline();
 const { xoa_dau } = require("../helpers/xoadau");
 const { readHtml } = require("../helpers/doT");
 
@@ -58,8 +59,11 @@ module.exports = {
       res.cookie(`_uid`, `123-456-789`);
       return res.status(200).json(allProducts.rows);
     } catch (err) {
-      console.log(err.message);
-      res.status(500);
+      let data = {
+        success: false,
+        message: err.message,
+      };
+      return res.status(500).json(data);
     }
   },
 
@@ -75,8 +79,11 @@ module.exports = {
       );
       return res.status(200).json(product[0]);
     } catch (err) {
-      console.log(err.message);
-      res.status(500);
+      let data = {
+        success: false,
+        message: err.message,
+      };
+      return res.status(500).json(data);
     }
   },
 
@@ -95,8 +102,11 @@ module.exports = {
       }
       return res.status(200).json(product[0]);
     } catch (err) {
-      console.log(err.message);
-      res.status(500);
+      let data = {
+        success: false,
+        message: err.message,
+      };
+      return res.status(500).json(data);
     }
   },
 
@@ -106,8 +116,11 @@ module.exports = {
       const product = await productModel.delete(id);
       return res.status(200).json(product[0]);
     } catch (err) {
-      console.log(err.message);
-      res.status(500);
+      let data = {
+        success: false,
+        message: err.message,
+      };
+      return res.status(500).json(data);
     }
   },
 
@@ -132,8 +145,11 @@ module.exports = {
         return res.status(200).json(product[0]);
       }
     } catch (err) {
-      console.log(err.message);
-      res.status(500);
+      let data = {
+        success: false,
+        message: err.message,
+      };
+      return res.status(500).json(data);
     }
   },
 
@@ -143,8 +159,11 @@ module.exports = {
       console.log(upsertedProducts);
       return res.status(200).json(upsertedProducts);
     } catch (err) {
-      console.log(err);
-      return res.status(500);
+      let data = {
+        success: false,
+        message: err.message,
+      };
+      return res.status(500).json(data);
     }
   },
 
@@ -153,16 +172,22 @@ module.exports = {
       let category = xoa_dau(req.body.category);
       let { portal_id } = req.body;
       let records = req.body.records;
+
       console.log("portal_id: ", portal_id);
       let key = `portal:${portal_id}:category:${category}:mostview`;
       let productsId = await redis.zrevrange(key, 0, records - 1);
       console.log(productsId);
+
       return res.status(200).json(productsId);
     } catch (err) {
-      console.log(err);
-      return res.status(500);
+      let data = {
+        success: false,
+        message: err.message,
+      };
+      return res.status(500).json(data);
     }
   },
+
   async mostViewProductByUser(req, res) {
     try {
       const uid = req.body.__uid;
@@ -171,9 +196,14 @@ module.exports = {
       const productsId = await redis.zrevrange(key, 0, records - 1);
       return res.status(200).json({ productsId });
     } catch (err) {
-      console.log(err);
+      let data = {
+        success: false,
+        message: err.message,
+      };
+      return res.status(500).json(data);
     }
   },
+
   async mostViewProductByCategory(req, res) {
     try {
       let category = xoa_dau(req.body.category);
@@ -182,9 +212,14 @@ module.exports = {
       let productsId = await redis.zrevrange(key, 0, records - 1);
       return res.status(200).json({ productsId });
     } catch (err) {
-      console.log(err);
+      let data = {
+        success: false,
+        message: err.message,
+      };
+      return res.status(500).json(data);
     }
   },
+
   async getHtmlTopViewProductByCategory(req, res) {
     try {
       let products = [];
@@ -209,31 +244,23 @@ module.exports = {
       console.log("mang products:", products);
       let title = "Product of the same category";
 
-      let html;
-      switch (portal_id) {
-        case 1:
-          html = await readHtml(
-            "./view/NguyenKim_productRecommend.html",
-            products,
-            title
-          );
-          break;
-        case 2:
-          html = await readHtml(
-            "./view/PNJ_productRecommend.html",
-            products,
-            title
-          );
-        default:
-          break;
-      }
+      let html = await readHtml(
+        `./view/portal_${portal_id}.html`,
+        products,
+        title
+      );
       res.writeHead(200, { "Content-Type": "text/html" });
       //console.log("html: ", html);
       res.end(html);
     } catch (err) {
-      console.log(err);
+      let data = {
+        success: false,
+        message: err.message,
+      };
+      return res.status(500).json(data);
     }
   },
+
   async getHtmlViewedProduct(req, res) {
     try {
       let products = [];
@@ -259,29 +286,21 @@ module.exports = {
       const sliceProducts = products.slice(0, records);
       console.log("viewed products:", products);
       let title = "recently viewed Products";
-      let html;
-      switch (portal_id) {
-        case 1:
-          html = await readHtml(
-            "./view/NguyenKim_productRecommend.html",
-            sliceProducts,
-            title
-          );
-          break;
-        case 2:
-          html = await readHtml(
-            "./view/PNJ_productRecommend.html",
-            sliceProducts,
-            title
-          );
-        default:
-          break;
-      }
+
+      let html = await readHtml(
+        `./view/portal_${portal_id}.html`,
+        products,
+        title
+      );
       res.writeHead(200, { "Content-Type": "text/html" });
       //console.log("html: ", html);
       res.end(html);
     } catch (err) {
-      console.log(err);
+      let data = {
+        success: false,
+        message: err.message,
+      };
+      return res.status(500).json(data);
     }
   },
 };

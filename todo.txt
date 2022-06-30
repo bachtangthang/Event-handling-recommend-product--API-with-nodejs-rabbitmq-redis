@@ -242,3 +242,26 @@ dung zrange, zincrby(done)
  6. Them so luot view ngay canh san pham (done)
  7. Thay doi cach luu xuong redis, luc nay luu them portalId de dinh danh portal(done)
 
+ To do:
+ 1. Sua cach dat ten file(done)
+ 2. Kiem tra viec tra ve gia tri gi, phai cho FE nhan dc response(done)
+ 3. Gom nhom code cung chuc nang trong mot function(done)
+ 4. Doi controller tu product -> events, tra ve 2 html 
+ 5. gop cac api tren custom js 
+ 6. process song song, su dunng pipiline, hgetall, multi.. Khong duoc dat await trong vong for vi no lam cham he thong, neu can thiet thi dung promise.all
+ 7. Sua lai ten file dung chuan, sua lai dynamic view(done)
+ 8. Khi nguoi dung vua vao mot product, data product se dc dua vao rabbitmq, luc nay t cung goi tra ve 2 trang html, nen san pham vua them vao se khong kip hien thi tren redis(done)
+ 
+
+ viewed-product:${uid}: sorted set
+    product A: 1
+    product B: 2
+
+    get top 5 most viewed products:
+
+main-category:${category} set
+
+To do:
+1. fix xoa dau category ("Phu Kien Dien Thoai") = > (phu_kien_dien_thoai) (done)
+2. Tach readHtml ra rieng, readHTML va them dotp vao (de tiet kiem thoi gian doc file) (done)
+3. Sua file event_histories controller (done)

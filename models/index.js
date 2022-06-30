@@ -1,4 +1,4 @@
-const { Event_historiesModel } = require("./Event_historiesModel");
+const { EventHistoryModel } = require("./EventHistoryModel");
 const { ProductModel } = require("./ProductModel");
 const { UsersModel } = require("./UsersModel");
 
@@ -16,11 +16,11 @@ const usersModel = new UsersModel(
   "uid"
 );
 
-const event_historiesModel = new Event_historiesModel(
+const eventHistoryModel = new EventHistoryModel(
   "event_histories",
   "uid",
   ["event", "uid", "productsid"],
   "uid"
 );
 
-module.exports = { productModel, usersModel, event_historiesModel };
+module.exports = { productModel, usersModel, eventHistoryModel };

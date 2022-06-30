@@ -2,7 +2,7 @@ const client = require("../db");
 const { CRUDModel } = require("./Model");
 const Redis = require("ioredis");
 const redis = new Redis(6379);
-class Event_historiesModel extends CRUDModel {
+class EventHistoryModel extends CRUDModel {
   constructor(table, tablePrimaryKey, default_columns, default_sort) {
     // this.table = table;
     // this.tablePrimaryKey = tablePrimaryKey;
@@ -17,4 +17,4 @@ class Event_historiesModel extends CRUDModel {
   }
 }
 
-module.exports = { Event_historiesModel };
+module.exports = { EventHistoryModel };

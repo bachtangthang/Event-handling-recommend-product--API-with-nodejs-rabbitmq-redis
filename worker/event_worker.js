@@ -5,7 +5,7 @@ const EVENT_QUEUE_NAME = process.env.EVENT_QUEUE_NAME;
 const Redis = require("ioredis");
 const redis = new Redis(6379);
 const { productModel } = require("../models/index");
-const { event_historiesModel } = require("../models/index");
+const { eventHistoryModel } = require("../models/index");
 const { xoa_dau } = require("../helpers/xoadau");
 amqp.connect(RABBIT_URL, (error, connection) => {
   connection.createChannel((err, channel) => {
@@ -20,13 +20,15 @@ amqp.connect(RABBIT_URL, (error, connection) => {
         try {
           const payload = JSON.parse(msg.content.toString());
           console.log("payload: ", payload);
-          const { __uid, event, portal_id } = payload;
+          const { __uid, event, portal_id, products } = payload;
           console.log("portal_id inside event_worker: ", portal_id);
-          let existedProduct;
+          let existedProduct = null;
           //insert to database product and redis
-          for (product of payload.products) {
+          for (let product of products) {
             console.log("product: ", product);
+            console.log("product_id: ", product.product_Id);
             existedProduct = await productModel.checkExist(product.product_Id);
+            console.log("existedProduct: ", existedProduct);
             console.log(`Co ton tai product: ${existedProduct[0].exists}`);
             //save most view cua user, san pham
             await redis.zincrby(
@@ -68,13 +70,12 @@ amqp.connect(RABBIT_URL, (error, connection) => {
                 portal_id
               );
               console.log("calling create event_histories");
-              await event_historiesModel.create(
+              await eventHistoryModel.create(
                 __uid,
                 event,
                 insertedProducts[0].product_id,
                 portal_id
               );
-              //existedProduct = true;
             } else {
               await redis.sadd(
                 `portal:${portal_id}:user:${__uid}`,

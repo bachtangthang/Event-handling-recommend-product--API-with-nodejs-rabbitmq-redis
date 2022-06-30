@@ -72,7 +72,7 @@ CREATE TABLE PRODUCTS(
     image_url text,
     landing_page_url text,
     category text,
-    price numeric(10,2),
+    price numeric,
     status integer,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -116,5 +116,6 @@ insert into event_histories (event, uid) values ('view_product', '123')
 
 insert into users (uid) values ('1')
 
-select exists(select 1 from products where product_id='30555')
+select exists(select 1 from products where product_id='89049')
+select exists(select 1 from products where product_id = $1
 select * from products where product_id = '123-456-789123151231'

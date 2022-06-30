@@ -1,20 +1,26 @@
 const dot = require("dot");
 const fs = require("fs");
 const { productsTest } = require("../data");
-function readHtml(path, products, title) {
-  return new Promise((res, rej) => {
-    console.log(title);
+function readHtml(path) {
+  return new Promise((resolve, reject) => {
     fs.readFile(path, "utf8", function (err, data) {
-      if (err) return console.log(err);
-      console.log("result read: " + data);
-      let dotP = dot.template(data);
-      let final = dotP({
-        title: title,
-        products: products,
-      });
-      console.log(final);
-      res(final);
+      if (err) return reject(err.message);
+      //console.log("result read: " + data);
+      resolve(data);
     });
   });
 }
-module.exports = { readHtml };
+
+function buildHtml(html, products, title) {
+  try {
+    let dotP = dot.template(html);
+    let final = dotP({
+      title: title,
+      products: products,
+    });
+    return final;
+  } catch (err) {
+    console.log(err);
+  }
+}
+module.exports = { readHtml, buildHtml };

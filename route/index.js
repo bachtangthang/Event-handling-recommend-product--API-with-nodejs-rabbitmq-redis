@@ -1,7 +1,7 @@
 const express = require("express");
 const productsRoute = require("./productRoute");
 const usersRoute = require("./usersRoute");
-const event_historiesRoute = require("./event_historiesRoute");
+const eventHistoryRoute = require("./eventHistoryRoute");
 
 const app = express();
 
@@ -28,6 +28,6 @@ app.use(function (req, res, next) {
 
 app.use("/products", productsRoute);
 app.use("/users", usersRoute);
-app.use("/eventHistories", event_historiesRoute);
+app.use("/eventHistories", eventHistoryRoute);
 
 module.exports = app;

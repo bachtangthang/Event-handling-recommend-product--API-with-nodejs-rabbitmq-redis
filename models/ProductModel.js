@@ -45,9 +45,8 @@ class ProductModel extends CRUDModel {
   async checkExist(product_id) {
     //Nguyen kim product_Id
     let query = `select exists(select 1 from ${this.table} where product_id = $1)`;
-    return await (
-      await client.query(query, [product_id])
-    ).rows;
+    console.log(product_id);
+    return (await client.query(query, [product_id])).rows;
   }
 }
 
