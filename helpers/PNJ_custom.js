@@ -1,10 +1,12 @@
 function crawlData(portal_id) {
-  const product_name =
-    document.getElementsByClassName("product_info_name")[0].innerText;
+  const product_name = document.getElementsByClassName(
+    "ty-product-block-title"
+  )[0].innerText;
   console.log("product_name: ", product_name);
 
-  const image_url =
-    document.getElementsByClassName("img-full-width ")[0].currentSrc;
+  const image_url = document.querySelector(
+    "a.cm-image-previewer.active.cm-previewer.ty-previewer"
+  ).currentSrc;
   console.log("image_url: ", image_url);
 
   let url = window.location.href;
@@ -12,16 +14,16 @@ function crawlData(portal_id) {
   console.log("landing_page_url: ", landing_page_url);
 
   const category = document
-    .getElementsByClassName("pdp_breadcrumbs")[0]
+    .getElementsByClassName("ty-breadcrumbs clearfix")[0]
     .getElementsByTagName("a")[1].innerText;
-  //console.log("category:", category);
+  console.log("category:", category);
 
-  const price =
-    document.getElementsByClassName("nk-price-final")[0].dataset.price;
-  //console.log("price: ",price);
+  const price = document
+    .getElementsByClassName("ty-price-num")[0]
+    .innerText.replaceAll(".", "");
+  console.log("price: ", price);
 
-  const product_Id =
-    document.getElementsByClassName("nk-price-final")[0].dataset.product_id;
+  const product_Id = document.getElementById("product_id").value;
   console.log("product_id: ", product_Id);
   const crawledProduct = {
     product_name,
@@ -33,6 +35,7 @@ function crawlData(portal_id) {
     status: 1,
     portal_id,
   };
+  console.log(crawledProduct);
   return crawledProduct;
 }
 
@@ -81,6 +84,7 @@ async function identify(demo_uid, portal_id) {
     let payload = {
       __uid: getCookie("demo_uid"),
       event: "viewProduct",
+      limit: 4,
     };
     console.log("payload inside identify function: ", payload);
     return payload;
@@ -91,15 +95,14 @@ async function identify(demo_uid, portal_id) {
 
 async function events(payload) {
   try {
-    await fetch("http://localhost:5000/eventHistories/events", {
+    let response = await fetch("http://localhost:5000/eventHistories/events", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("data", data);
-      });
+    });
+    let data = await response.json();
+    console.log("data in event function: ", data);
+    return data;
   } catch (err) {
     console.log(err);
   }
@@ -146,14 +149,12 @@ function appendHtml(data) {
   const div = document.createElement("div");
   div.innerHTML = data;
   document
-    .getElementsByClassName(
-      "span16 nk-product-collection nk-product-special margbt10"
-    )[0]
+    .getElementsByClassName("container-fluid content-grid")[0]
     .appendChild(div);
-  console.log("div1: ", div);
+  console.log("div: ", div);
 }
 
-async function main_NguyenKim(portal_id) {
+async function main(portal_id) {
   let crawledProduct = crawlData(portal_id);
   console.log("crawledProduct: ", crawledProduct);
 
@@ -164,29 +165,24 @@ async function main_NguyenKim(portal_id) {
   payload.products = [crawledProduct];
   payload.portal_id = portal_id;
   console.log("payload: ", payload);
-  await events(payload);
+  let { htmlSameCategory, htmlRecentlyView } = await events(payload);
+  // let recommendProductOfSameCategory = {
+  //   category: crawledProduct.category,
+  //   records: 4,
+  //   portal_id
+  // }
+  // let htmlTopViewProduct = await getHtmlTopViewProductByCategory(recommendProductOfSameCategory);
 
-  let recommendProductOfSameCategory = {
-    category: crawledProduct.category,
-    records: 4,
-    portal_id,
-  };
-  let htmlTopViewProduct = await getHtmlTopViewProductByCategory(
-    recommendProductOfSameCategory
-  );
+  appendHtml(htmlSameCategory);
 
-  appendHtml(htmlTopViewProduct);
+  // let recommendRecentlyViewedProduct = {
+  //   __uid: getCookie("demo_uid"),
+  //   records: 4,
+  //   portal_id
+  // }
+  // let htmlViewedProduct = await getHtmlViewedProduct(recommendRecentlyViewedProduct);
 
-  let recommendRecentlyViewedProduct = {
-    __uid: getCookie("demo_uid"),
-    records: 4,
-    portal_id,
-  };
-  let htmlViewedProduct = await getHtmlViewedProduct(
-    recommendRecentlyViewedProduct
-  );
-
-  appendHtml(htmlViewedProduct);
+  appendHtml(htmlRecentlyView);
 }
 
-main_NguyenKim(1);
+main(2);
