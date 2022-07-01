@@ -130,9 +130,7 @@ module.exports = {
       columns.split(",");
       let product = {};
       if ((await redis.hget(`products:${id}`, "product_id")) !== null) {
-        for (col of columns.split(",")) {
-          product[col] = await redis.hget(`products:${id}`, col);
-        }
+        let product = await redis.hgetall(`products:${id}`);
         console.log(product);
 
         return res.status(200).json(product);
