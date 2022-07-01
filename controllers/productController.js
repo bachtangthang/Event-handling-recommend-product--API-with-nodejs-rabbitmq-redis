@@ -9,7 +9,6 @@ const DEFAULT_COLUMNS = "id,product_name";
 var channel, connection;
 const Redis = require("ioredis");
 const redis = new Redis(6379);
-const pipeline = redis.pipeline();
 const { xoa_dau } = require("../helpers/xoadau");
 const { readHtml } = require("../helpers/doT");
 
@@ -56,7 +55,6 @@ module.exports = {
       const { id } = req.params;
       const { columns } = req.query;
       const allProducts = await productModel.getDetail(id, columns);
-      res.cookie(`_uid`, `123-456-789`);
       return res.status(200).json(allProducts.rows);
     } catch (err) {
       let data = {
