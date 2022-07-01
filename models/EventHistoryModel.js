@@ -1,7 +1,6 @@
 const client = require("../db");
 const { CRUDModel } = require("./Model");
-const Redis = require("ioredis");
-const redis = new Redis(6379);
+
 class EventHistoryModel extends CRUDModel {
   constructor(table, tablePrimaryKey, default_columns, default_sort) {
     // this.table = table;
