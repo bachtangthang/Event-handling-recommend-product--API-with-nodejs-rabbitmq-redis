@@ -1,8 +1,6 @@
 const { usersModel } = require("../models/index");
-const cookieParser = require("cookie-parser");
 const { v4 } = require("uuid");
 
-const COOKIE_NAME = "demo_uid";
 module.exports = {
   async identify(req, res) {
     try {
