@@ -5,9 +5,6 @@ const RABBIT_URL = process.env.RABBIT_URL;
 
 const RABBIT_QUEUE_NAME = "event";
 const table = "event_histores";
-//const tablePrimaryKey = "product_id";
-//const DEFAULT_COLUMNS = "product_id,product_name,qty";
-//const DEFAULT_SORT = "product_id";
 
 var channel, connection;
 const Redis = require("ioredis");
